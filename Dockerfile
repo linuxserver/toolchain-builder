@@ -7,7 +7,9 @@ LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DA
 
 # package versions
 ARG CMAKE_VER="3.9.1"
+ARG GLIB_VER="2.52.3"
 ARG NASM_VER="2.13.01"
+ARG TEXINFO_VER="6.4"
 ARG YASM_VER="1.3.0"
 
 # install fetch packages
@@ -54,10 +56,13 @@ RUN \
 	autoconf \
 	automake \
 	gawk \
+	gettext \
 	gperf \
 	libarchive-dev \
 	libbz2-dev \
 	libcurl4-gnutls-dev \
+	libmount-dev \
+	libpcre++-dev \
 	libtool \
 	lsb-release \
 	make \
@@ -67,8 +72,41 @@ RUN \
  rm -rf \
 	/var/lib/apt/lists/*
 
-# compile cmake
+# compile libffi
 RUN \
+ curl -o \
+ /tmp/libffi-3.2.1.tar.gz -L \
+	"https://sourceware.org/ftp/libffi/libffi-3.2.1.tar.gz" && \
+ tar xf \
+ /tmp/libffi-3.2.1.tar.gz -C /tmp/ && \
+ cd /tmp/libffi-3.2.1 && \
+ sed -e \
+	'/^includesdir/ s/$(libdir).*$/$(includedir)/' \
+	-i include/Makefile.in && \
+ sed -e \
+	'/^includedir/ s/=.*$/=@includedir@/' \
+	-e 's/^Cflags: -I${includedir}/Cflags:/' \
+	-i libffi.pc.in && \
+ ./configure \
+	--disable-static \
+	--prefix=/usr && \
+ make && \
+ make install && \
+
+# compile glib2
+ curl -o \
+ /tmp/glib-${GLIB_VER}.tar.xz -L \
+	"http://ftp.gnome.org/pub/gnome/sources/glib/${GLIB_VER%.*}/glib-${GLIB_VER}.tar.xz" && \
+ tar xf \
+ /tmp/glib-${GLIB_VER}.tar.xz -C /tmp/ && \
+ cd /tmp/glib-${GLIB_VER} && \
+ ./configure \
+	--prefix=/usr \
+	--with-pcre=system && \
+ make && \
+ make install && \
+
+# compile cmake
  curl -o \
  /tmp/cmake-${CMAKE_VER}.tar.gz -L \
 	"https://cmake.org/files/v3.9/cmake-${CMAKE_VER}.tar.gz" && \
@@ -111,6 +149,21 @@ RUN \
 	--prefix=/usr && \
  make && \
  make install && \
+
+# compile texinfo
+ curl -o \
+ /tmp/texinfo-${TEXINFO_VER}.tar.xz -L \
+	"http://ftp.gnu.org/gnu/texinfo/texinfo-${TEXINFO_VER}.tar.xz" && \
+ tar xf \
+ /tmp/texinfo-${TEXINFO_VER}.tar.xz -C /tmp/ && \
+ cd /tmp/texinfo-${TEXINFO_VER} && \
+ ./configure \
+	--disable-static \
+	--prefix=/usr && \
+ make && \
+ make check && \
+ make install && \
+ make TEXMF=/usr/share/texmf install-tex && \
 
 # cleanup
  rm -rf \
