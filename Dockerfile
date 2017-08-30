@@ -26,15 +26,18 @@ RUN \
 	libarchive-dev \
 	libbz2-dev \
 	libcurl4-gnutls-dev \
+	libglib2.0-dev \
 	libpcre++-dev \
 	libtool \
 	lsb-release \
 	make \
 	mercurial \
+	perl \
 	pkgconf \
 	pkg-config \
 	python-dev \
 	tar \
+	texi2html \
 	texinfo \
 	unrar \
 	unzip \
