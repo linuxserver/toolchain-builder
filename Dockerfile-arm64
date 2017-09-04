@@ -19,6 +19,7 @@ RUN \
 	bzip2 \
 	cmake \
 	curl \
+	doxygen \
 	gawk \
 	gettext \
 	git \
@@ -33,7 +34,6 @@ RUN \
 	make \
 	mercurial \
 	perl \
-	pkgconf \
 	pkg-config \
 	python-dev \
 	tar \
